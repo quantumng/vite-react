@@ -1,14 +1,39 @@
-import { useState } from 'react'
+import { useState, createContext } from 'react'
 import { Routes, Route, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { RootState } from '@store';
 import './test.scss'
 
+interface AuthContextType {
+    user: any;
+    signin: (user: string, callback: VoidFunction) => void;
+    signout: (callback: VoidFunction) => void;
+  }
+  
+  let AuthContext = createContext<AuthContextType>(null!);
+  
+  function AuthProvider({ children }: { children: React.ReactNode }) {
+    let [user, setUser] = useState<any>(null);
+  
+    let signin = (newUser: string, callback: VoidFunction) => {
+      return true;
+    };
+  
+    let signout = (callback: VoidFunction) => {
+      return true
+    };
+  
+    let value = { user, signin, signout };
+  
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  }
+
 function App() {
     const userInfo = useSelector((state: RootState) => state.user.userInfo);
 
     return (
-        <div className="App">
+        <AuthProvider>
+            <div className="App">
             <header className="App-header">
                 <p className='uni'>Hello, {userInfo.name || 'There'}</p>
                 <p>
@@ -21,8 +46,19 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="about" element={<About />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route
+                    path="/protected"
+                    element={
+                        <RequireAuth>
+                            <ProtectedPage />
+                        </RequireAuth>
+                    }
+                />
+        </Route>
             </Routes>
         </div>
+        </AuthProvider>
     )
 }
 
